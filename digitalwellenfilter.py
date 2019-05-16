@@ -13,29 +13,50 @@ class Element:
         self.delay = np.zeros(2)
         self.ein = 0
         self.aus = 0
-        if typ in {1, 2}:
+        self.s1 = 0
+        self.s2 = 0
+        self.s3 = 0
+        if typ in {1, 2, 3}:
             self.typ = typ
+        else:
+            raise Exception("Ungueltiger Typ '{}'".format(self.typ))
+
+    def update(self):
+        if self.typ == 1:
+            self.s1 = self.ein + self.delay[1]
+            self.s2 = self.s1 * self.a - self.delay[1]
+            self.s3 = self.s1 + self.s2
+
+            self.aus = self.s2
+
+        elif self.typ == 2:
+            self.s1 = self.ein + self.delay[1]
+            self.s2 = self.s1 * self.a - self.delay[1]
+            self.s3 = self.s2 - self.s1
+
+            self.aus = self.s3
+
+        elif self.typ == 3:
+            self.s1 = self.ein + self.delay[1]
+            self.s2 = self.s1 * self.a - self.delay[1]
+            self.s3 = self.s1 - self.s2
+
+            self.aus = self.s3
+
         else:
             raise Exception("Ungueltiger Typ '{}'".format(self.typ))
 
     def advance(self):
         if self.typ == 1:
-            s1 = self.ein + self.delay[1]
-            s2 = s1 * self.a - self.delay[1]
-            s3 = s1 + s2
-
-            self.aus = s2
             self.delay[1] = self.delay[0]
-            self.delay[0] = s3
+            self.delay[0] = self.s3
 
         elif self.typ == 2:
-            s1 = self.ein + self.delay[1]
-            s2 = s1 * self.a - self.delay[1]
-            s3 = s2 - s1
-
-            self.aus = s3
             self.delay[1] = self.delay[0]
-            self.delay[0] = s2
+            self.delay[0] = self.s2
+        elif self.typ == 3:
+            self.delay[1] = self.delay[0]
+            self.delay[0] = self.s2
         else:
             raise Exception("Ungueltiger Typ '{}'".format(self.typ))
 
@@ -58,38 +79,43 @@ class Filter():
         self.e.append(Element(0.423068, 1))
         self.e.append(Element(0.258673, 2))
         self.e.append(Element(0.094433, 2))
-        self.e.append(Element(0.015279, 2))
+        self.e.append(Element(0.015279, 3))
 
         self.aus = 0
         self.ein = 0
         self.delay = 0
 
-    def advance(self):
+    def update(self):
         self.e[1].ein = self.ein
         self.e[5].ein = self.ein
-        self.e[1].advance()
-        self.e[5].advance()
+        self.e[1].update()
+        self.e[5].update()
 
         self.e[2].ein = self.e[1].aus
         self.e[6].ein = self.e[5].aus
-        self.e[2].advance()
-        self.e[6].advance()
+        self.e[2].update()
+        self.e[6].update()
 
         self.e[3].ein = self.e[2].aus
         self.e[7].ein = self.e[6].aus
-        self.e[3].advance()
-        self.e[7].advance()
+        self.e[3].update()
+        self.e[7].update()
 
         self.e[4].ein = self.e[3].aus
         self.e[8].ein = self.e[7].aus
-        self.e[4].advance()
-        self.e[8].advance()
+        self.e[4].update()
+        self.e[8].update()
 
-        self.delay = self.e[4].aus
         self.e[9].ein = self.e[8].aus
-        self.e[9].advance()
+        self.e[9].update()
 
-        self.aus = 0.5 * (self.delay - self.e[9].aus)
+        self.aus = 0.5 * (self.delay + self.e[9].aus)
+
+    def advance(self):
+        self.delay = self.e[4].aus
+        for e in self.e:
+            e.advance()
+
         # # Ausgang:
         # self.aus = 0.5 * (self.delay - self.e[9].aus)
         # # Oberer Zweig:
@@ -122,6 +148,7 @@ def test_Filter():
 
     for index in range(n):
         f.ein = x[index]
+        f.update()
         f.advance()
         y[index] = f.aus
 

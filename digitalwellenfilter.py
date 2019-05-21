@@ -9,7 +9,7 @@ class Element:
     Typ 1 fuer 0 > gamma > -0.5
     Typ 2 fuer -0.5 > gamma > -1
     """
-    def __init__(self, a, typ=1):
+    def __init__(self, a):
         self.a = a
         self.delay = np.zeros(2)
         self.ein = 0
@@ -17,50 +17,17 @@ class Element:
         self.s1 = 0
         self.s2 = 0
         self.s3 = 0
-        if typ in {1, 2, 3}:
-            self.typ = typ
-        else:
-            raise Exception("Ungueltiger Typ '{}'".format(self.typ))
 
     def update(self):
-        if self.typ == 1:
-            self.s1 = self.ein + self.delay[1]
-            self.s2 = self.s1 * self.a - self.delay[1]
-            self.s3 = self.s1 + self.s2
+        self.s1 = self.delay[1] - self.ein
+        self.s2 = self.a * self.s1 + self.delay[1]
+        self.s3 = self.s2 - self.s1
 
-            self.aus = self.s2
-
-        elif self.typ == 2:
-            self.s1 = self.ein + self.delay[1]
-            self.s2 = self.s1 * self.a - self.delay[1]
-            self.s3 = self.s2 - self.s1
-
-            self.aus = self.s3
-
-        elif self.typ == 3:
-            self.s1 = self.ein + self.delay[1]
-            self.s2 = self.s1 * self.a - self.delay[1]
-            self.s3 = self.s1 - self.s2
-
-            self.aus = self.s3
-
-        else:
-            raise Exception("Ungueltiger Typ '{}'".format(self.typ))
+        self.aus = self.s2
 
     def advance(self):
-        if self.typ == 1:
-            self.delay[1] = self.delay[0]
-            self.delay[0] = self.s3
-
-        elif self.typ == 2:
-            self.delay[1] = self.delay[0]
-            self.delay[0] = self.s2
-            
-        elif self.typ == 3:
-            self.delay[1] = self.delay[0]
-            self.delay[0] = self.s2
-        else:
-            raise Exception("Ungueltiger Typ '{}'".format(self.typ))
+        self.delay[1] = self.delay[0]
+        self.delay[0] = self.s3
 
 
 class Filter():
@@ -69,21 +36,22 @@ class Filter():
     Ausgang 1: Tiefpass
     Ausgang 2: Hochpass
     """
-    def __init__(self):
-        self.e = [Element(0, 1)]
+    def __init__(self, fs = 16.3e3, F = 64e3):
+        self.e = [Element(0)]
+        gamma = self.calculate_gamma(fs, F)
+        self.e.append(Element(gamma[2]))
+        self.e.append(Element(gamma[4]))
+        self.e.append(Element(gamma[6]))
+        self.e.append(Element(gamma[8]))
 
-        self.e.append(Element(0.226119, 1))
-        self.e.append(Element(0.397578, 2))
-        self.e.append(Element(0.160677, 2))
-        self.e.append(Element(0.049153, 2))
+        self.e.append(Element(gamma[1]))
+        self.e.append(Element(gamma[3]))
+        self.e.append(Element(gamma[5]))
+        self.e.append(Element(gamma[7]))
+        self.e.append(Element(gamma[9]))
 
-        self.e.append(Element(0.063978, 1))
-        self.e.append(Element(0.423068, 1))
-        self.e.append(Element(0.258673, 2))
-        self.e.append(Element(0.094433, 2))
-        self.e.append(Element(0.015279, 3))
-
-        self.aus = 0
+        self.aus_hp = 0
+        self.auf_tp = 0
         self.ein = 0
         self.delay = 0
 
@@ -111,30 +79,14 @@ class Filter():
         self.e[9].ein = self.e[8].aus
         self.e[9].update()
 
-        self.aus = 0.5 * (self.delay + self.e[9].aus)
+        self.aus_hp = 0.5 * (self.delay - self.e[9].aus)
+        self.aus_tp = 0.5 * (self.delay + self.e[9].aus)
 
     def advance(self):
         self.delay = self.e[4].aus
         for e in self.e:
             e.advance()
 
-        # # Ausgang:
-        # self.aus = 0.5 * (self.delay - self.e[9].aus)
-        # # Oberer Zweig:
-        # self.delay = self.e[4].aus
-        # self.e[4].ein = self.e[3].aus
-        # self.e[3].ein = self.e[2].aus
-        # self.e[2].ein = self.e[1].aus
-        # self.e[1].ein = self.ein
-        # # Unterer Zweig:
-        # self.e[9].ein = self.e[8].aus
-        # self.e[8].ein = self.e[7].aus
-        # self.e[7].ein = self.e[6].aus
-        # self.e[6].ein = self.e[5].aus
-        # self.e[5].ein = self.ein
-        # # Advance the Elements
-        # for e_ in self.e:
-        #     e_.advance()
 
     def calculate_gamma(self,fs, F):
         gamma = np.zeros(10)
@@ -165,51 +117,28 @@ class Filter():
 def test_Filter():
     n = 2**14
     x = np.zeros(n)
-    y = np.zeros(n)
-    Fs = 64e3
-    delta_f = Fs/n
-    fscale = np.arange(0, Fs, delta_f)
+    y_tp = np.zeros(n)
+    y_hp = np.zeros(n)
+    F = 64e3
+    fs = 16.3e3
+    delta_f = F/n
+    fscale = np.arange(0, F/2, delta_f)
     x[0] = 1
 
-    f = Filter()
+    f = Filter(fs, F)
 
     for index in range(n):
         f.ein = x[index]
-        f.update()
+        f.update()        
         f.advance()
-        y[index] = f.aus
-
+        y_tp[index] = f.aus_tp
+        y_hp[index] = f.aus_hp
     plt.figure(1).set_size_inches(12, 8)
-    plt.title("Digitalwellenfilter Zeitbereich")
-    plt.plot(x)
-    plt.plot(y)
-    plt.figure(2).set_size_inches(12, 8)
     plt.title("Digitalwellenfilter Frequenzbereich")
-    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y))))#[0:n//2])))
+    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_tp)[0:n//2])))
+    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp)[0:n//2])))
+    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp + y_tp)[0:n//2])))    
     plt.show()
 
 
-def test_fft():
-    Fs = 64e3
-    f1 = 16e3
-    f2 = 3e3
-    f3 = 31e3
-    x = np.zeros(2048)
-    y = np.array(range(2048))
-    x = (np.sin(2 * np.pi * y * f1 / Fs) + np.sin(2 * np.pi * y * f2 / Fs) +
-         np.sin(2 * np.pi * y * f3 / Fs))
-
-    plt.figure(1)
-    plt.plot(x)
-    plt.figure(2)
-    plt.plot(abs(np.fft.fft(x)))
-    plt.show()
-
-
-#test_Filter()
-
-f = Filter()
-fs = 16.3e3
-F = 64e3
-
-g = f.calculate_gamma(fs, F)
+test_Filter()

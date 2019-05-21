@@ -1,6 +1,5 @@
 import digitalwellenfilter as dwf
 
-
 def test_Element1_init():
     e = dwf.Element(1, 1)
     assert e.a == 1

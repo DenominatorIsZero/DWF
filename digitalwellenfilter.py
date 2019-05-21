@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -54,6 +55,7 @@ class Element:
         elif self.typ == 2:
             self.delay[1] = self.delay[0]
             self.delay[0] = self.s2
+            
         elif self.typ == 3:
             self.delay[1] = self.delay[0]
             self.delay[0] = self.s2
@@ -134,6 +136,31 @@ class Filter():
         # for e_ in self.e:
         #     e_.advance()
 
+    def calculate_gamma(self,fs, F):
+        gamma = np.zeros(10)
+        q = np.zeros(5)
+        q[0] = math.tan(math.pi * fs / F)
+
+        for i in range(1,5):
+            q[i] = q[i-1]**2 + (q[i-1]**4 - 1)**(1/2)
+
+        c = np.zeros(5)
+        y = np.zeros(10)
+        for i in range(1,10):
+            c[4] = q[4]/(math.sin(i * math.pi / 19))
+            for k in reversed(range(0,4)):
+                c[k] = 1 / (2 * q[k]) * (c[k+1] + 1/c[k+1])
+                
+            y[i] = 1/c[0]
+
+        a = np.zeros(10)
+
+        for i in range(1,10):
+            a[i] = 2 / (1 + y[i]**2) * (1 - (q[0]**2 + 1 / (q[0]**2) - y[i]**2) * y[i] **2)**(1/2)
+            gamma[i] = (a[i] - 2) / (a[i] + 2)
+        
+        return gamma
+
 
 def test_Filter():
     n = 2**14
@@ -141,7 +168,7 @@ def test_Filter():
     y = np.zeros(n)
     Fs = 64e3
     delta_f = Fs/n
-    fscale = np.arange(0, Fs/2, delta_f)
+    fscale = np.arange(0, Fs, delta_f)
     x[0] = 1
 
     f = Filter()
@@ -158,7 +185,7 @@ def test_Filter():
     plt.plot(y)
     plt.figure(2).set_size_inches(12, 8)
     plt.title("Digitalwellenfilter Frequenzbereich")
-    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y)[0:n//2])))
+    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y))))#[0:n//2])))
     plt.show()
 
 
@@ -179,4 +206,10 @@ def test_fft():
     plt.show()
 
 
-test_Filter()
+#test_Filter()
+
+f = Filter()
+fs = 16.3e3
+F = 64e3
+
+g = f.calculate_gamma(fs, F)

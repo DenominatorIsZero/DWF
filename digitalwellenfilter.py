@@ -9,9 +9,10 @@ class Element:
     Typ 1 fuer 0 > gamma > -0.5
     Typ 2 fuer -0.5 > gamma > -1
     """
-    def __init__(self, a):
+    def __init__(self, a, T=1):
+        self.T = T
         self.a = a
-        self.delay = np.zeros(2)
+        self.delay = np.zeros(2*self.T)
         self.ein = 0
         self.aus = 0
         self.s1 = 0
@@ -19,14 +20,16 @@ class Element:
         self.s3 = 0
 
     def update(self):
-        self.s1 = self.delay[1] - self.ein
-        self.s2 = self.a * self.s1 + self.delay[1]
+        self.s1 = self.delay[2*self.T-1] - self.ein
+        self.s2 = self.a * self.s1 + self.delay[2*self.T-1]
         self.s3 = self.s2 - self.s1
 
         self.aus = self.s2
 
     def advance(self):
-        self.delay[1] = self.delay[0]
+        for i in reversed(range(1,2*self.T)):
+            self.delay[i] = self.delay[i-1]
+
         self.delay[0] = self.s3
 
 
@@ -36,24 +39,25 @@ class Filter():
     Ausgang 1: Tiefpass
     Ausgang 2: Hochpass
     """
-    def __init__(self, fs = 16.3e3, F = 64e3):
+    def __init__(self, fs = 16.3e3, F = 64e3, T=1):
+        self.T = T
         self.e = [Element(0)]
         gamma = self.calculate_gamma(fs, F)
-        self.e.append(Element(gamma[2]))
-        self.e.append(Element(gamma[4]))
-        self.e.append(Element(gamma[6]))
-        self.e.append(Element(gamma[8]))
+        self.e.append(Element(gamma[2], self.T))
+        self.e.append(Element(gamma[4], self.T))
+        self.e.append(Element(gamma[6], self.T))
+        self.e.append(Element(gamma[8], self.T))
 
-        self.e.append(Element(gamma[1]))
-        self.e.append(Element(gamma[3]))
-        self.e.append(Element(gamma[5]))
-        self.e.append(Element(gamma[7]))
-        self.e.append(Element(gamma[9]))
+        self.e.append(Element(gamma[1], self.T))
+        self.e.append(Element(gamma[3], self.T))
+        self.e.append(Element(gamma[5], self.T))
+        self.e.append(Element(gamma[7], self.T))
+        self.e.append(Element(gamma[9], self.T))
 
         self.aus_hp = 0
         self.auf_tp = 0
         self.ein = 0
-        self.delay = 0
+        self.delay = np.zeros(self.T)
 
     def update(self):
         self.e[1].ein = self.ein
@@ -79,11 +83,15 @@ class Filter():
         self.e[9].ein = self.e[8].aus
         self.e[9].update()
 
-        self.aus_hp = 0.5 * (self.delay - self.e[9].aus)
-        self.aus_tp = 0.5 * (self.delay + self.e[9].aus)
+        self.aus_hp = 0.5 * (self.delay[self.T-1] - self.e[9].aus)
+        self.aus_tp = 0.5 * (self.delay[self.T-1] + self.e[9].aus)
 
     def advance(self):
-        self.delay = self.e[4].aus
+        for i in reversed(range(1,self.T)):
+            self.delay[i] = self.delay[i-1]
+            
+        self.delay[0] = self.e[4].aus
+        
         for e in self.e:
             e.advance()
 
@@ -113,8 +121,42 @@ class Filter():
         
         return gamma
 
+class Filter_Bank():
+    """
+    Oktavfilterbank mit 9 Ausgaengen. Hoechste Frequenz an aus[0], niedrigste an aus[8]
+    """
 
-def test_Filter():
+    def __init__(self, fs = 16.3e3, F = 64e3):
+        self.F = []      
+        for i in range(8):
+            self.F.append(Filter(fs, F, 2**i))
+        self.ein = 0
+        self.aus = np.zeros(9)
+
+    def update(self):
+        self.F[0].ein = self.ein
+        self.F[0].update()
+        self.aus[0] = self.F[0].aus_hp
+
+        for i in range(1,7):
+            self.F[i].ein = self.F[i-1].aus_tp
+            self.F[i].update()
+            self.aus[i] = self.F[i].aus_hp
+
+        self.F[7].ein = self.F[6].aus_tp
+        self.F[7].update()
+        self.aus[7] = self.F[7].aus_hp
+
+        self.aus[8] = self.F[7].aus_tp
+
+    def advance(self):
+        for f in self.F:
+            f.advance()
+        
+        
+
+
+def test_Filter(T=1):
     n = 2**14
     x = np.zeros(n)
     y_tp = np.zeros(n)
@@ -125,7 +167,7 @@ def test_Filter():
     fscale = np.arange(0, F/2, delta_f)
     x[0] = 1
 
-    f = Filter(fs, F)
+    f = Filter(fs, F, T)
 
     for index in range(n):
         f.ein = x[index]
@@ -140,5 +182,35 @@ def test_Filter():
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp + y_tp)[0:n//2])))    
     plt.show()
 
+def test_Filter_Bank():
+    n = 2**15
+    x = np.zeros(n)
+    y = np.zeros([9,n])
+    F = 64e3 * 2/3
+    fs = 16.3e3 * 2/3
+    delta_f = F/n
+    fscale = np.arange(0, F/2, delta_f)
+    x[0] = 1
 
-test_Filter()
+    b = Filter_Bank()
+
+    for index in range(n):
+        b.ein = x[index]
+        b.update()
+        b.advance()
+        for i in range(9):
+            y[i-1][index] = b.aus[i-1]
+
+    for i in range(9):
+        plt.figure(i).set_size_inches(12, 8)
+        plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Ausgang {0}".format(i))
+        plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
+        
+    plt.figure(10).set_size_inches(12, 8)
+    plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Summe der Ausgaenge")
+    plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(sum(y))[0:n//2])))
+    plt.show()
+    
+# test_Filter(1)
+
+test_Filter_Bank()

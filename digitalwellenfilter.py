@@ -126,7 +126,10 @@ class Filter_Bank():
     Oktavfilterbank mit 9 Ausgaengen. Hoechste Frequenz an aus[0], niedrigste an aus[8]
     """
 
-    def __init__(self, fs = 16.3e3, F = 64e3):
+    def __init__(self, fs = 16.3e3, F = 64e3, delay_num = [1, 1, 1, 1, 1, 1, 1, 1, 1]):
+        self.delay = []
+        for i in delay_num:
+            self.delay.append(np.zeros(i))
         self.F = []      
         for i in range(8):
             self.F.append(Filter(fs, F, 2**i))
@@ -136,22 +139,28 @@ class Filter_Bank():
     def update(self):
         self.F[0].ein = self.ein
         self.F[0].update()
-        self.aus[0] = self.F[0].aus_hp
+        self.delay[0][0] = self.F[0].aus_hp
 
         for i in range(1,7):
             self.F[i].ein = self.F[i-1].aus_tp
             self.F[i].update()
-            self.aus[i] = self.F[i].aus_hp
+            self.delay[i][0] = self.F[i].aus_hp
 
         self.F[7].ein = self.F[6].aus_tp
         self.F[7].update()
-        self.aus[7] = self.F[7].aus_hp
+        self.delay[7][0] = self.F[7].aus_hp
 
-        self.aus[8] = self.F[7].aus_tp
+        self.delay[8][0] = self.F[7].aus_tp
+
 
     def advance(self):
         for f in self.F:
             f.advance()
+
+        for i in range(9):
+            for j in reversed(range(1,len(self.delay[i]))):
+                self.delay[i][j] = self.delay[i][j-1]
+            self.aus[i] = self.delay[i][-1]
         
         
 
@@ -182,8 +191,8 @@ def test_Filter(T=1):
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp + y_tp)[0:n//2])))    
     plt.show()
 
-def test_Filter_Bank():
-    n = 2**15
+def test_Filter_Bank(delay_num = [1, 1, 1, 1, 1, 1, 1, 1, 1]):
+    n = 2**14
     x = np.zeros(n)
     y = np.zeros([9,n])
     F = 64e3 * 2/3
@@ -192,7 +201,7 @@ def test_Filter_Bank():
     fscale = np.arange(0, F/2, delta_f)
     x[0] = 1
 
-    b = Filter_Bank()
+    b = Filter_Bank(delay_num = delay_num)
 
     for index in range(n):
         b.ein = x[index]
@@ -201,16 +210,26 @@ def test_Filter_Bank():
         for i in range(9):
             y[i-1][index] = b.aus[i-1]
 
-    for i in range(9):
-        plt.figure(i).set_size_inches(12, 8)
-        plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Ausgang {0}".format(i))
-        plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
+    # for i in range(9):
+    #     plt.figure(i).set_size_inches(12, 8)
+    #     plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Ausgang {0}".format(i))
+    #     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
         
     plt.figure(10).set_size_inches(12, 8)
     plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Summe der Ausgaenge")
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(sum(y))[0:n//2])))
+
+    plt.figure(11).set_size_inches(12, 8)
+    plt.title("Digitalwellenfilterbank Daempfung im Zeitbereich Alle Augaenge")
+    for i in range(9):
+        plt.plot(y[i])
+
+    # plt.legend([str(x) for x in range(9)])    
     plt.show()
     
 # test_Filter(1)
 
-test_Filter_Bank()
+maximum = [4, 20, 44, 91, 186, 375, 755, 1500, 900]
+
+delay_num = [max(maximum) - m if max(maximum) - m > 0 else 1 for m in maximum]
+test_Filter_Bank(delay_num)

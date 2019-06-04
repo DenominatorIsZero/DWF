@@ -59,6 +59,8 @@ class Filter():
         self.ein = 0
         self.delay = np.zeros(self.T)
 
+        self.pointer = np.zeros(9)
+
     def update(self):
         self.e[1].ein = self.ein
         self.e[5].ein = self.ein
@@ -139,18 +141,18 @@ class Filter_Bank():
     def update(self):
         self.F[0].ein = self.ein
         self.F[0].update()
-        self.delay[0][0] = self.F[0].aus_hp
+        self.delay[0][self.pointer[0]] = self.F[0].aus_hp
 
         for i in range(1,7):
             self.F[i].ein = self.F[i-1].aus_tp
             self.F[i].update()
-            self.delay[i][0] = self.F[i].aus_hp
+            self.delay[i][self.pointer[i]] = self.F[i].aus_hp
 
         self.F[7].ein = self.F[6].aus_tp
         self.F[7].update()
-        self.delay[7][0] = self.F[7].aus_hp
+        self.delay[7][self.pointer[7]] = self.F[7].aus_hp
 
-        self.delay[8][0] = self.F[7].aus_tp
+        self.delay[8][self.pointer[8]] = self.F[7].aus_tp
 
 
     def advance(self):
@@ -158,9 +160,10 @@ class Filter_Bank():
             f.advance()
 
         for i in range(9):
-            for j in reversed(range(1,len(self.delay[i]))):
-                self.delay[i][j] = self.delay[i][j-1]
-            self.aus[i] = self.delay[i][-1]
+            #for j in reversed(range(1,len(self.delay[i]))):
+                #self.delay[i][j] = self.delay[i][j-1]
+            self.aus[i] = self.delay[i][self.pointer[i]-1]
+            self.pointer[i] = (self.pointer[i] + 1) % len(self.delay[i])
         
         
 

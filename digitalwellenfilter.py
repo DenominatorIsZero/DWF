@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 class Element:
     """
     Einzelelement fuer einen Digitalwellenfilter
-    Typ 1 fuer 0 > gamma > -0.5
-    Typ 2 fuer -0.5 > gamma > -1
     """
     def __init__(self, a, T=1):
         self.T = T
@@ -18,26 +16,24 @@ class Element:
         self.s1 = 0
         self.s2 = 0
         self.s3 = 0
+        self.pointer = 0
 
     def update(self):
-        self.s1 = self.delay[2*self.T-1] - self.ein
-        self.s2 = self.a * self.s1 + self.delay[2*self.T-1]
+        delay_ausgang = self.delay[(self.pointer+1) % len(self.delay)]
+        self.s1 = delay_ausgang - self.ein
+        self.s2 = self.a * self.s1 + delay_ausgang
         self.s3 = self.s2 - self.s1
 
         self.aus = self.s2
 
     def advance(self):
-        for i in reversed(range(1,2*self.T)):
-            self.delay[i] = self.delay[i-1]
-
-        self.delay[0] = self.s3
+        self.pointer = (self.pointer + 1) % len(self.delay)
+        self.delay[self.pointer] = self.s3
 
 
 class Filter():
     """
-    Digitalwellenfilter 19. Grades mit Grenzfrequenz fg.
-    Ausgang 1: Tiefpass
-    Ausgang 2: Hochpass
+    Digitalwellenfilter 19. Grades
     """
     def __init__(self, fs=16.3e3, F=64e3, T=1):
         self.T = T
@@ -58,8 +54,7 @@ class Filter():
         self.auf_tp = 0
         self.ein = 0
         self.delay = np.zeros(self.T)
-
-        
+        self.pointer = 0
 
     def update(self):
         self.e[1].ein = self.ein
@@ -85,42 +80,41 @@ class Filter():
         self.e[9].ein = self.e[8].aus
         self.e[9].update()
 
-        self.aus_hp = 0.5 * (self.delay[self.T-1] - self.e[9].aus)
-        self.aus_tp = 0.5 * (self.delay[self.T-1] + self.e[9].aus)
+        delay_ausgang = self.delay[(self.pointer + 1) % len(self.delay)]
+        self.aus_hp = 0.5 * (delay_ausgang - self.e[9].aus)
+        self.aus_tp = 0.5 * (delay_ausgang + self.e[9].aus)
 
     def advance(self):
-        for i in reversed(range(1, self.T)):
-            self.delay[i] = self.delay[i-1]
+        self.pointer = (self.pointer + 1) % len(self.delay)
+        self.delay[self.pointer] = self.e[4].aus
 
-        self.delay[0] = self.e[4].aus
-        
         for e in self.e:
             e.advance()
-
 
     def calculate_gamma(self, fs, F):
         gamma = np.zeros(10)
         q = np.zeros(5)
         q[0] = math.tan(math.pi * fs / F)
 
-        for i in range(1,5):
+        for i in range(1, 5):
             q[i] = q[i-1]**2 + (q[i-1]**4 - 1)**(1/2)
 
         c = np.zeros(5)
         y = np.zeros(10)
-        for i in range(1,10):
+        for i in range(1, 10):
             c[4] = q[4]/(math.sin(i * math.pi / 19))
-            for k in reversed(range(0,4)):
+            for k in reversed(range(0, 4)):
                 c[k] = 1 / (2 * q[k]) * (c[k+1] + 1/c[k+1])
-                
+
             y[i] = 1/c[0]
 
         a = np.zeros(10)
 
-        for i in range(1,10):
-            a[i] = 2 / (1 + y[i]**2) * (1 - (q[0]**2 + 1 / (q[0]**2) - y[i]**2) * y[i] **2)**(1/2)
+        for i in range(1, 10):
+            a[i] = 2 / (1 + y[i]**2) * (1 - (q[0]**2 + 1 / (q[0]**2) - y[i]**2)
+                                        * y[i]**2)**(1/2)
             gamma[i] = (a[i] - 2) / (a[i] + 2)
-        
+
         return gamma
 
 
@@ -130,7 +124,7 @@ class Filter_Bank():
     niedrigste an aus[8]
     """
 
-    def __init__(self, fs=16.3e3, F=64e3, delay_num=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
+    def __init__(self, fs=16.3e3, F=64e3, delay_num=[0]*9):
         self.delay = []
         for i in delay_num:
             self.delay.append(np.zeros(i))
@@ -140,7 +134,7 @@ class Filter_Bank():
         self.ein = 0
         self.aus = np.zeros(9)
         self.pointer = [0]*9
-        
+
     def update(self):
         self.F[0].ein = self.ein
         self.F[0].update()
@@ -166,7 +160,6 @@ class Filter_Bank():
             self.aus[i] = self.delay[i][self.pointer[i]]
 
 
-
 def test_Filter(T=1):
     n = 2**14
     x = np.zeros(n)
@@ -186,11 +179,13 @@ def test_Filter(T=1):
         f.advance()
         y_tp[index] = f.aus_tp
         y_hp[index] = f.aus_hp
+
     plt.figure(1).set_size_inches(12, 8)
     plt.title("Digitalwellenfilter Frequenzbereich")
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_tp)[0:n//2])))
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp)[0:n//2])))
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y_hp + y_tp)[0:n//2])))
+
     plt.figure(2).set_size_inches(12, 8)
     plt.title("Digitalwellenfilter Zeitbereich")
     plt.plot(y_tp)
@@ -198,7 +193,7 @@ def test_Filter(T=1):
     plt.show()
 
 
-def test_Filter_Bank(delay_num=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
+def test_Filter_Bank(delay_num=[0]*9):
     n = 2**16
     x = np.zeros(n)
     y = np.zeros([9, n])
@@ -216,10 +211,11 @@ def test_Filter_Bank(delay_num=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
         for i in range(9):
             y[i-1][index] = b.aus[i-1]
 
-    # for i in range(9):
-    #     plt.figure(i).set_size_inches(12, 8)
-    #     plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich Ausgang {0}".format(i))
-    #     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
+    for i in range(9):
+        plt.figure(i).set_size_inches(12, 8)
+        plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich"
+                  " Ausgang {0}".format(i))
+        plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
 
     plt.figure(10).set_size_inches(12, 8)
     plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich"
@@ -230,20 +226,21 @@ def test_Filter_Bank(delay_num=[1, 1, 1, 1, 1, 1, 1, 1, 1]):
     plt.title("Digitalwellenfilterbank Daempfung im Zeitbereich Alle Augaenge")
     for i in range(9):
         plt.plot(y[i])
-        
+    plt.legend([str(x) for x in range(9)])
+
     plt.figure(12).set_size_inches(12, 8)
     plt.title("Digitalwellenfilterbank Summe der Ausgaenge im Zeitbereich")
     plt.plot(sum(y))
     plt.plot(x)
-    #yplt.legend([str(x) for x in range(9)].append("Summe der Ausgaenge"))
-    
+
     plt.show()
 
-#test_Filter(T=2)
 
+# test_Filter(T=1)
 
+# Maximum der Impulsantworten der einzelnen Teilbaender, optisch ermittelt
 maximum = [4, 20, 44, 91, 186, 375, 755, 900, 1500]
-#maximum = [4, 12, 20, 36, 58, 122, 250, 506, 506]
-# maximum = [0]*9
+# Benoetigte Verzoegerungen damit die Impulsantworten der einzelnen Teilbaender
+# ihr Maximum zur selben Zeit erreichen
 delay_num = [max(maximum) - m if max(maximum) - m > 0 else 1 for m in maximum]
 test_Filter_Bank(delay_num)

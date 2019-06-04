@@ -39,7 +39,7 @@ class Filter():
     Ausgang 1: Tiefpass
     Ausgang 2: Hochpass
     """
-    def __init__(self, fs = 16.3e3, F = 64e3, T=1):
+    def __init__(self, fs=16.3e3, F=64e3, T=1):
         self.T = T
         self.e = [Element(0)]
         gamma = self.calculate_gamma(fs, F)

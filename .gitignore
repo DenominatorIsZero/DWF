@@ -1,8 +1,12 @@
 *.py~
 __pycache__/
 *.gitignore~
-/Dokumentation/**
-!/Dokumetation/style/**
-!/Dokumetation/example/*.tex
-!/Dokumetation/example/*.bib
-!/Dokumetation/pictures/**
+*.aux
+*.bbl
+*.blg
+*.pdf
+*.el
+*.toc
+*~
+*.out
+*.log

@@ -11,11 +11,11 @@ Für einige Berechnungen und das Speichern von Datenstruckturen wurde das Numpy 
   \includegraphics[width=1\textwidth]{img/klassendia}
   \caption{Klassendiagramm für die Implementierung einer hochselektiven Filterbank}\label{fig:impl_klassdia}
 \end{figure}
-Wie in Abbildung~\ref{fig:impl_klassdia} zu sehen erfolgt die Implementierung der hochselektiven Filterbank objektorientiert. Dabei besteht eine Filterbank aus 8 Filtern (vgl. Abb. TODO) und ein Filter aus 9 Elementen (vgl. Abb.).
+Wie in Abbildung~\ref{fig:impl_klassdia} zu sehen erfolgt die Implementierung der hochselektiven Filterbank objektorientiert. Dabei besteht eine Filterbank aus 8 Filtern (vgl. Abb.~\ref{fig:OktavFilterbank}) und ein Filter aus 9 Elementen (vgl. Abb.~\ref{fig:bireziprok_Struktur}).
 \subsection{Klassen}\label{sec:impl_klassen}
 Im folgenden wird die Implementierung der Klassen im einzelnen beschrieben bevor im nächsten Unterkaptitel auf dei verwendeten Testfunktionen eingegangen wird.
 \subsubsection{Element}\label{sec:impl_ele}
-Ein Element (s. Lst.~\ref{lst:element}) stellt den kleinsten Teil der Filterbank dar. Neben Ein- und Ausgang verfügt ein Element über ein Delay-Array dessen Länge bei der Initialisierung übergeben werden kann. Hierüber lässt sich die Ordnung des Teilfilters einstellen (vlg. Kap. TODO). Außerdem muss bei der Initialisierung ein Wert für \emph{a} übergeben werden. Dieser bestimmt mit welchem Wert im Element multipliziert wird (vlg. Abb. TODO).
+Ein Element (s. Lst.~\ref{lst:element}) stellt den kleinsten Teil der Filterbank dar. Neben Ein- und Ausgang verfügt ein Element über ein Delay-Array dessen Länge bei der Initialisierung übergeben werden kann. Hierüber lässt sich die Ordnung des Teilfilters einstellen (vlg. Kap. TODO). Außerdem muss bei der Initialisierung ein Wert für \emph{a} übergeben werden. Dieser bestimmt mit welchem Wert im Element multipliziert wird (vlg. Abb.~\ref{fig:Adaptor}).
 
 Über das Aufrufen der Funktion \emph{update()} werden die Summen und der Ausgang des Elements neu berechnet. Die Funktion \emph{advance()} wird verwendet um einen Takt des Systems zu simulieren. Der Pointer, welcher den aktuellen Eingang des Verzögerungsgliedes anzeigt wird inkrementiert und ein neuer Wert wird in das Array geschrieben. Der aktuell gültige Augang des Verzögerungsarrays befindet sich eine Stelle \emph{vor} dem Eingang (vgl. Lst.~\ref{lst:element} Zeile 16).
 
@@ -23,14 +23,14 @@ Ein Element (s. Lst.~\ref{lst:element}) stellt den kleinsten Teil der Filterbank
 
 
 \subsubsection{Filter}\label{sec:impl_Filter}
-Ein Teilfilter (s. Lst.~\ref{lst:filter}) besteht aus 9 Elementen und einem Verzögerungsglied (vlg. Abb. TODO). Bei der Initialisierung muss kann die Anzahl der Verzögerungen und damit die Ordnung des Teilfilters übergeben werden. Die Koeffizienten der Elemnte gemäß~\cite{gaszi1983} über die Funktion \emph{calculate\_gamma(fs, F)} berechnet. Wobei \emph{F} die Taktfrequenz des Systems und \emph{fs} die gewünschte Stopfrequenz des Filters ist.
+Ein Teilfilter (s. Lst.~\ref{lst:filter}) besteht aus 9 Elementen und einem Verzögerungsglied (vlg. Abb.~\ref{fig:bireziprok_Struktur}). Bei der Initialisierung muss kann die Anzahl der Verzögerungen und damit die Ordnung des Teilfilters übergeben werden. Die Koeffizienten der Elemnte gemäß~\cite{gaszi1983} über die Funktion \emph{calculate\_gamma(fs, F)} berechnet. Wobei \emph{F} die Taktfrequenz des Systems und \emph{fs} die gewünschte Stopfrequenz des Filters ist.
 
-Über die Funktion \emph{update()} werden die Ausgänge der enthaltenden Elemente nacheinander berechnet. Dabei wird dem Eingang der Ersten zwei Elemente der Wert des Filtereingangs zugewiesen. Die restlichen Eingänge ergeben sich durch die Augänge der vorherigen Filter. Durch die Funktion \emph{advance()} wird wieder der Takt simuliert. Die Verzögerungsglieder der Elemente und das Verzögerungsglied des Filters (vgl. Abb. TODO rechts) werden aktuallisiert.
+Über die Funktion \emph{update()} werden die Ausgänge der enthaltenden Elemente nacheinander berechnet. Dabei wird dem Eingang der Ersten zwei Elemente der Wert des Filtereingangs zugewiesen. Die restlichen Eingänge ergeben sich durch die Augänge der vorherigen Filter. Durch die Funktion \emph{advance()} wird wieder der Takt simuliert. Die Verzögerungsglieder der Elemente und das Verzögerungsglied des Filters (vgl. Abb.~\ref{fig:bireziprok_Struktur} rechts) werden aktuallisiert.
 
 \lstinputlisting[language=Python, firstline=34, lastline=118, caption={Quellcode der Klasse Filter}, label={lst:filter}]{list/wellendigitalfilter.py}
 
 \subsubsection{Filterbank}\label{sec:impl_bank}
-Die oberste Hierarchieebene bildet die Klasse Filterbank (s. Lst. \ref{lst:bank}). Sie beinhaltet die 8 Teilfilter (vlg. Abb. TODO). Als Ausgänge stehen die 9 Teilbänder zur verfügung. Diese sind um jeweils so verzögert, dass das Maximum der Impulsantworten der einzelnen Teilbänder in etwa zum gleichen Takt ausgegeben werden. Die Bestimmung dieser Verzögerungen erfolgte durch simulieren der Filterbank \emph{ohne} Anpassung der Laufzeiten. Dabei wurden die Maxima der Impulsantworten graphisch bestimmt (s. Tab.~\ref{tab:filt_max}).
+Die oberste Hierarchieebene bildet die Klasse Filterbank (s. Lst. \ref{lst:bank}). Sie beinhaltet die 8 Teilfilter (vlg. Abb.~\ref{fig:OktavFilterbank}). Als Ausgänge stehen die 9 Teilbänder zur verfügung. Diese sind um jeweils so verzögert, dass das Maximum der Impulsantworten der einzelnen Teilbänder in etwa zum gleichen Takt ausgegeben werden. Die Bestimmung dieser Verzögerungen erfolgte durch simulieren der Filterbank \emph{ohne} Anpassung der Laufzeiten. Dabei wurden die Maxima der Impulsantworten graphisch bestimmt (s. Tab.~\ref{tab:filt_max}).
 
 \begin{table}[!htpb]
   \centering

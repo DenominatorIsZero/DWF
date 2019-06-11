@@ -1,0 +1,15 @@
+% Encoding: UTF-8
+
+@misc{kunold1989,
+  title={D�mpfungsentzerrung von Audiokan�len mit Br�cken-Wellendigitalfiltern},
+  author={Ingo Kunold},
+  year={1989},
+}
+
+@misc{gaszi1983,
+  title={Explicit Formulas for Lattice Wave Digital Filters},
+  author={Lajos Gaszi},
+  year={1983},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

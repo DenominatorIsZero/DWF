@@ -194,7 +194,7 @@ def test_Filter(T=1):
 
 
 def test_Filter_Bank(delay_num=[1]*9):
-    n = 2**16
+    n = 2**14
     x = np.zeros(n)
     y = np.zeros([9, n])
     F = 64e3 * 2/3
@@ -215,24 +215,32 @@ def test_Filter_Bank(delay_num=[1]*9):
         plt.figure(i).set_size_inches(12, 8)
         plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich"
                   " Ausgang {0}".format(i))
+        plt.xlabel("Frequenz in Hz")
+        plt.ylabel("Daempfung in dB")
         plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(y[i])[0:n//2])))
 
     plt.figure(10).set_size_inches(12, 8)
     plt.title("Digitalwellenfilterbank Daempfung im Frequenzbereich"
               " Summe der Ausgaenge")
+    plt.xlabel("Frequenz in Hz")
+    plt.ylabel("Daempfung in dB")
     plt.plot(fscale, -20 * np.log10(abs(np.fft.fft(sum(y))[0:n//2])))
 
     plt.figure(11).set_size_inches(12, 8)
-    plt.title("Digitalwellenfilterbank Daempfung im Zeitbereich Alle Augaenge")
+    plt.title("Impulsantwort im Zeitbereich (Alle Augaenge)")
+    plt.xlabel("Zeit in Takten")
+    plt.ylabel("Impulsantwort")
     for i in range(9):
         plt.plot(y[i])
     plt.legend([str(x) for x in range(9)])
 
     plt.figure(12).set_size_inches(12, 8)
     plt.title("Digitalwellenfilterbank Summe der Ausgaenge im Zeitbereich")
+    plt.xlabel("Zeit in Takten")
+    plt.ylabel("Impulsantwort")
     plt.plot(sum(y))
     plt.plot(x)
-
+    plt.legend(["Ausgang", "Eingang"])
     plt.show()
 
 

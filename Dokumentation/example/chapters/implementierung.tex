@@ -54,7 +54,7 @@ Die oberste Hierarchieebene bildet die Klasse Filterbank (s. Lst. \ref{lst:bank}
 \end{table}
 Damit ergeben sich die benötigten Verzögerungen gemäß Listing~\ref{lst:verz}.
 
-\lstinputlisting[language=Python, firstline=241, lastline=245, caption={Quellcode zur Berechnung der zum Laufzeitausgleich benötigten Verzögerungen}, label={lst:verz}]{list/wellendigitalfilter.py}
+\lstinputlisting[language=Python, firstline=249, lastline=253, caption={Quellcode zur Berechnung der zum Laufzeitausgleich benötigten Verzögerungen}, label={lst:verz}]{list/wellendigitalfilter.py}
 
 Über die Funktion \emph{update()} werden die Eingänge der einzelnen Filter aktuallisiert und die Ausgänge berechnet. Die Simulation des Taktes erfolgt wieder über die Funktion \emph{advance()}. Es werden die Verzögerungsglieder aller Teilfilter und damit aller Elemente sowie die Verzögerungsglieder für den Laufzeitausgleich der Filterbank aktuallisiert.
 
@@ -66,7 +66,7 @@ Damit ergeben sich die benötigten Verzögerungen gemäß Listing~\ref{lst:verz}
 \lstinputlisting[language=Python, firstline=163, lastline=193, caption={Quellcode der Testfunktion für einen einzlnen Filter}, label={lst:test_filter}]{list/wellendigitalfilter.py}
 \subsubsection{Test Filterbank}\label{sec:impl_testBank}
 Die Funktion \emph{test\_Filter\_Bank()} wird verwendet um die gesamte Filterbank zu simulieren. Es wird ebenfalls die Reaktion auf einen Impuls berechnet. Anschließend werden die einzelnen Teilbänder sowie die Summe der Teilbänder im Frequenz- und Zeitbreich dargestellt.
-\lstinputlisting[language=Python, firstline=196, lastline=236, caption={Quellcode der Testfunktion für die gesamte Filterbank}, label={lst:test_bank}]{list/wellendigitalfilter.py}
+\lstinputlisting[language=Python, firstline=196, lastline=244, caption={Quellcode der Testfunktion für die gesamte Filterbank}, label={lst:test_bank}]{list/wellendigitalfilter.py}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../termpaper"

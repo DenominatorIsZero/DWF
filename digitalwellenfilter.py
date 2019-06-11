@@ -193,8 +193,8 @@ def test_Filter(T=1):
     plt.show()
 
 
-def test_Filter_Bank(delay_num=[0]*9):
-    n = 2**16
+def test_Filter_Bank(delay_num=[1]*9):
+    n = 2**14
     x = np.zeros(n)
     y = np.zeros([9, n])
     F = 64e3 * 2/3
@@ -239,7 +239,7 @@ def test_Filter_Bank(delay_num=[0]*9):
 # test_Filter(T=1)
 
 # Maximum der Impulsantworten der einzelnen Teilbaender, optisch ermittelt
-maximum = [4, 20, 44, 91, 186, 375, 755, 900, 1500]
+maximum = [4, 20, 44, 91, 186, 375, 755, 1500, 900]
 # Benoetigte Verzoegerungen damit die Impulsantworten der einzelnen Teilbaender
 # ihr Maximum zur selben Zeit erreichen
 delay_num = [max(maximum) - m if max(maximum) - m > 0 else 1 for m in maximum]

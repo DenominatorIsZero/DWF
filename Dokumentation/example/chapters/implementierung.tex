@@ -23,7 +23,7 @@ Ein Element (s. Lst.~\ref{lst:element}) stellt den kleinsten Teil der Filterbank
 
 
 \subsubsection{Filter}\label{sec:impl_Filter}
-Ein Teilfilter (s. Lst.~\ref{lst:filter}) besteht aus 9 Elementen und einem Verzögerungsglied (vlg. Abb. TODO). Bei der Initialisierung muss kann die Anzahl der Verzögerungen und damit die Ordnung des Teilfilters übergeben werden. Die Koeffizienten der Elemnte gemäß~\cite{gaszi1983} über die Funktion \emph{calculate_gamma(fs, F)} berechnet. Wobei \emph{F} die Taktfrequenz des Systems und \emph{fs} die gewünschte Stopfrequenz des Filters ist.
+Ein Teilfilter (s. Lst.~\ref{lst:filter}) besteht aus 9 Elementen und einem Verzögerungsglied (vlg. Abb. TODO). Bei der Initialisierung muss kann die Anzahl der Verzögerungen und damit die Ordnung des Teilfilters übergeben werden. Die Koeffizienten der Elemnte gemäß~\cite{gaszi1983} über die Funktion \emph{calculate\_gamma(fs, F)} berechnet. Wobei \emph{F} die Taktfrequenz des Systems und \emph{fs} die gewünschte Stopfrequenz des Filters ist.
 
 Ü
 \lstinputlisting[language=Python, firstline=34, lastline=118, caption={Quellcode der Klasse Filter}, label={lst:filter}]{list/wellendigitalfilter.py}

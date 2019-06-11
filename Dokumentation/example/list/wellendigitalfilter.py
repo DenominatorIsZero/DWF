@@ -124,7 +124,7 @@ class Filter_Bank():
     niedrigste an aus[8]
     """
 
-    def __init__(self, fs=16.3e3, F=64e3, delay_num=[0]*9):
+    def __init__(self, fs=16.3e3, F=64e3, delay_num=[1]*9):
         self.delay = []
         for i in delay_num:
             self.delay.append(np.zeros(i))
@@ -193,7 +193,7 @@ def test_Filter(T=1):
     plt.show()
 
 
-def test_Filter_Bank(delay_num=[0]*9):
+def test_Filter_Bank(delay_num=[1]*9):
     n = 2**16
     x = np.zeros(n)
     y = np.zeros([9, n])
@@ -239,7 +239,7 @@ def test_Filter_Bank(delay_num=[0]*9):
 # test_Filter(T=1)
 
 # Maximum der Impulsantworten der einzelnen Teilbaender, optisch ermittelt
-maximum = [4, 20, 44, 91, 186, 375, 755, 900, 1500]
+maximum = [4, 20, 44, 91, 186, 375, 755, 1500, 900]
 # Benoetigte Verzoegerungen damit die Impulsantworten der einzelnen Teilbaender
 # ihr Maximum zur selben Zeit erreichen
 delay_num = [max(maximum) - m if max(maximum) - m > 0 else 1 for m in maximum]

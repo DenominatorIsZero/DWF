@@ -23,7 +23,7 @@ Ein weiteres exemplarisches Teilband zeigt Abbildung \ref{fig:Teilband5} mit dem
 Die restlichen Teilbänder zeigen ebenfalls den erwarteten Durchlassbereich.
 
 \subsection{Simulation der Signallaufzeiten}
-Nachfolgend werden die Signallaufzeiten der einzelnen Teilbänder simuliert und in einem zusammen in einem Plot dargestellt (siehe Abbildung \ref{fig:TeilbandLaufzeitenohne}). Zu erkennen ist, dass ein Ausgleich der einzelnen Signallaufzeiten nötig ist.\par
+Nachfolgend werden die Signallaufzeiten der einzelnen Teilbänder simuliert und zusammen in einem Plot dargestellt (siehe Abbildung \ref{fig:TeilbandLaufzeitenohne}). Zu erkennen ist, dass ein Ausgleich der einzelnen Signallaufzeiten nötig ist.\par
 \begin{figure}[h!]
 	\centering	\includegraphics[width=15cm]{img/bank_zeit_alle_keinAusgleich.png}
 	\caption{Signallaufzeiten der Teilfilterbänder ohne Ausgleich}
@@ -37,13 +37,13 @@ Die einzelnen laufzeitbereinigten Impulsantworten der Teilbänder zeigen das Max
 \end{figure}
 
 \subsection{Simulation des Oktav-Filterbank-Ausgangs}
-
+Abschließend wird die gesamte Oktav-Filterbank simuliert. In Abbildung \ref{fig:OktavLaufzeit} sieht man die Signallaufzeit der Filterbank. Zu erkennen ist bei $t$ = 0 der Impuls am Eingang. Nach den erwarteten 1500 Takten wird der Impuls am Ausgang ausgegeben.\par
 \begin{figure}[h!]
 	\centering	\includegraphics[width=14cm]{img/bank_zeit_summe.png}
-	\caption{Signallaufzeit der Summe der Teilbänder}
+	\caption{Signallaufzeit der Summe der Oktav-Filterbank}
 	\label{fig:OktavLaufzeit}
 \end{figure}
-
+In Abbildung \ref{fig:AusgangDeampfung} ist die Dämpfung der Filterbank zu sehen. Hierbei kommt es bei den Übergängen der einzelnen Teilbändern zu kleinen Abweichungen, da es sich um nicht lineare Filter in den Teilbändern handelt und eine feste Verzögerung implementiert wurde. Hierdurch ist die Verzögerung nicht bei allen Frequenzen optimal. Ein weiterer Punkt sind numerische Rundungsfehler, wodurch das Ergebnis ebenfalls leicht verfälscht wird und die Übergänge der Teilbandfilter nicht optimal sind.
 \begin{figure}[h!]
 	\centering	\includegraphics[width=14cm]{img/bank_freq_summe.png}
 	\caption{Dämpfung der Oktav-Filterbank}

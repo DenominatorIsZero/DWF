@@ -105,12 +105,13 @@
 
 \title[]{Hochselektive Oktavfilterbank}
 
-\author{Erik Engelhardt, Christopher Rotzlawski, Oli, Der Andere} % Your name
+\author{Erik Engelhardt, Jan Heimann, Oliver Kochan, Christopher Rotzlawski} % Your name
 \institute[HAW] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 {
   FH Westküste \\ % Your institution for the title page
+
   \medskip
-  \textit{erik.engelhardt@haw-hamburg.de} % Your email address
+%  \textit{erik.engelhardt@haw-hamburg.de} % Your email address
 }
 \date{\today} % Date, can be changed to a custom date
 
@@ -135,7 +136,152 @@
 
 \section{Simulation}
 
-\section{DSP Implementierung}
+\section{Realisierung}
+    \begin{frame}
+        \begin{itemize}
+            \item Entwicklungshardware:
+            \begin{itemize}
+                \item Spectrum Digital \emph{DSK6713}
+                \item CPU: Texas Instruments \emph{TMS320C6713} floating-point DSP
+            \end{itemize}
+            \item Messequipment
+            \begin{itemize}
+                \item AudioTester
+                \item PicoScope AWG + Oszilloskop
+                \item Rohde \& Schwarz UPV Audio Analyser  
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \begin{itemize}
+            \item Filterstruktur der Teilbandfilter nach Gaszi
+        \end{itemize}
+        \begin{figure}[b]
+            \centering
+            \includegraphics[width=\textwidth]{img/Teilbandfilter.png}
+            \caption{Struktur eines Teilbandfilters \citep[Abb. 14a]{gaszi1983}}
+        \end{figure}    
+    \end{frame}
+
+    \begin{frame}
+        \begin{itemize}
+            \item Fließkommaarithmetik
+            \begin{itemize}
+                \item Optimierungen für Festkommaarithmetik in Q15 entfallen
+                \item Einheitliche Struktur der Adaptore
+            \end{itemize}
+        \end{itemize}
+        \begin{figure}[b]
+            \centering
+            \includegraphics[width=0.7\textwidth]{img/Adaptor.png}
+            \caption{Symmetrischer Zweitor-Paralleladaptor \citep{bvdsv}}
+        \end{figure}
+    \end{frame}
+    
+    \begin{frame}
+        \begin{itemize}
+            \item Einlesen und Ausgeben der Samples über DMA
+            \begin{itemize}
+                \item Maximierung der verfügbaren Rechenzeit für die Filterberechnung
+                \item Blockgröße: 8 Samples ~~\dots~~ 2048 Samples
+            \end{itemize}
+            \item Sicherstellung des Echtzeitverhaltens
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \begin{itemize}
+            \item Erster Ansatz: ohne Optimierung
+            \begin{itemize}
+                \item DMA Blockgröße: 8 Samples
+                \item Delaylines als lineare Puffer realisiert
+                \item $\rightarrow$ 0 Teilbandfilter
+            \end{itemize}
+        \end{itemize}
+        \begin{itemize}
+            \item 1. Optimierungsschritt
+            \begin{itemize}
+                \item Compileroptimierung auf Stufe 1
+                \item $\rightarrow$ 3 Teilbandfilter
+            \end{itemize}
+        \end{itemize}
+        \begin{itemize}
+            \item 2. Optimierungsschritt
+            \begin{itemize}
+                \item Delaylines für Adaptore als Ringpuffer realisiert
+                \item $\rightarrow$ 6 Teilbandfilter
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \begin{itemize}
+            \item Entzerrung hinzugefügt
+            \begin{itemize}
+                \item DMA Blockgröße: 2048 Samples
+                \item $\rightarrow$ 6 Teilbandfilter
+            \end{itemize}
+            \item Letzter Optimierungsschritt
+            \begin{itemize}
+                \item Sämtliche Delaylines als Ringpuffer realisiert
+                \item Ersetzen der Modulo-Funktion
+                \item $\rightarrow$ 7 Teilbandfilter
+            \end{itemize}
+        \end{itemize}
+        \begin{itemize}
+            \item Weitere Optimierungsmaßnahmen ohne Wirkung
+            \begin{itemize}
+                \item Vergößerung der Ein- und Ausgabepuffer
+                \item Hinzufügen eines dritten Speicherblocks
+                \item Verringerung der Samplerate
+            \end{itemize}
+            \item Rechenzeit reicht für ein 8. Teilbandfilter ``gerade so'' nicht aus.
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \begin{itemize}
+            \item Live Demo?
+            \begin{itemize}
+                \item Amplitudenübertragungsverhalten der Filterbank
+                \item Hochpass-Ausgang eines einzelnen Teilbandfilters
+                \item Impulsantwort im Zeitbereich
+            \end{itemize}
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/f_gesamt.png}
+            \caption{Amplitudengang der gesamten Filterbank}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/uebergaenge.pdf}
+            \caption{Übergänge zwischen den Teilbandfiltern}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/f_hp1.png}
+            \caption{Hochpass-Ausgang des 2. Teilbandfilters}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/h_gesamt.png}
+            \caption{Impulsantwort der Filterbank im Zeitbereich}
+        \end{figure}
+    \end{frame}
 
 \section{Fazit}
 

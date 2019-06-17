@@ -103,9 +103,9 @@
 %	TITLE PAGE
 % ----------------------------------------------------------------------------------------
 
-\title[]{Hochselektive Oktavfilterbank}
+\title[Hochselektive Oktavfilterbank]{Hochselektive Oktavfilterbank}
 
-\author{Erik Engelhardt, Jan Heimann, Oliver Kochan, Christopher Rotzlawski} % Your name
+\author[]{Erik Engelhardt, Jan Heimann, Oliver Kochan, Christopher Rotzlawski} % Your name
 \institute[HAW] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 {
   FH Westküste \\ % Your institution for the title page
@@ -132,7 +132,25 @@
 
 \section{Einleitung}
 
+\begin{frame}
+\frametitle{Hochselektive Filterbank in Brückenstruktur}
+\begin{itemize}
+	\item Oktav-Filterbank mit bis zu 9 Teilbändern
+	\item Bieziproke Teilbandfilter
+	\item Simulation mit Python
+	\item Hardwarerealisation auf DSP TMS320C6713
+\end{itemize}
+\end{frame}
+
 \section{Grundlagen}
+
+\begin{frame}
+\frametitle{Bireziproker Teilbandfilter}
+\end{frame}
+
+\begin{frame}
+\frametitle{Oktav-Filterbank}
+\end{frame}
 
 \section{Simulation}
 
@@ -307,7 +325,7 @@
             \caption{Symmetrischer Zweitor-Paralleladaptor \citep{bvdsv}}
         \end{figure}
     \end{frame}
-    
+
     \begin{frame}
         \begin{itemize}
             \item Einlesen und Ausgeben der Samples über DMA
@@ -315,10 +333,27 @@
                 \item Maximierung der verfügbaren Rechenzeit für die Filterberechnung
                 \item Blockgröße: 8 Samples ~~\dots~~ 2048 Samples
             \end{itemize}
-            \item Sicherstellung des Echtzeitverhaltens
         \end{itemize}
     \end{frame}
 
+\subsection{Verarbeitung}
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/dma_zugriff.png}
+            \caption{DMA-Pingpong}
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}
+        \begin{figure}[p]
+            \centering
+            \includegraphics[width=\textwidth]{img/placeholder.png}
+            \caption{Schematische Darstellung eines Ringpuffers}
+        \end{figure}
+    \end{frame}
+
+\subsection{Optimierung}
     \begin{frame}
         \begin{itemize}
             \item Erster Ansatz: ohne Optimierung
@@ -369,6 +404,7 @@
         \end{itemize}
     \end{frame}
 
+\subsection{Ergebnisse}
     \begin{frame}
         \begin{itemize}
             \item Live Demo?
@@ -411,6 +447,7 @@
             \caption{Impulsantwort der Filterbank im Zeitbereich}
         \end{figure}
     \end{frame}
+
 
 \section{Fazit}
 

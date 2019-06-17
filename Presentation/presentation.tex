@@ -136,6 +136,135 @@
 
 \section{Simulation}
 
+\subsection{Umgebung}
+
+\begin{frame}
+  \frametitle{Simulationsumgebung}
+  \begin{itemize}
+  \item Simulation der Filterbank in Python
+    \begin{itemize}
+    \item Numpy Modul der Scipy-Bibliothek~\cite{scipy} für Berechnungen und Datenstruckturen
+    \item Matplotlib-Bibliothek zum Erstellen der Diagramme~\cite{Hunter:2007}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsection{Implementierung}
+
+\begin{frame}
+  \frametitle{Klassendiagramm}
+  \begin{itemize}
+  \item Simulation in zwei Schritten
+    \begin{itemize}
+    \item update()
+    \item advance()
+    \end{itemize}
+  \item Einstellen der Ordnung über Parameter T
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{img/klassendia}
+    \caption{Klassendiagramm für die Implementierung einer hochselektiven Filterbank}\label{fig:impl_klassdia}
+  \end{figure}
+\end{frame}
+
+% \begin{frame}
+%   \frametitle{Element}
+%   \begin{itemize}
+%   \item Repräsentiert einen Adaptor
+%   \end{itemize}
+%   \begin{figure}[h!]
+%     \centering	\includegraphics[width=10cm]{img/Adapter.png}
+%     \caption{Verwendeter Adaptor für den bireziproken Wellendigitalfilter \cite[][S. 77]{gaszi1983}}\label{fig:Adaptor}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}
+%   \frametitle{Filter}
+%   \begin{itemize}
+%   \item Besteht aus 9 \emph{Elementen} bzw. Adaptoren und einem Verzögerungsglied
+%   \end{itemize}
+%   \begin{figure}[h!]
+%     \centering	\includegraphics[width=15cm]{img/BireziprokerFilter.png}
+%     \caption{Grundstruktur des bireziproken Wellendigitalfilters \cite[][S. 85]{gaszi1983}}\label{fig:bireziprok_Struktur}
+%   \end{figure}
+% \end{frame}
+
+% \begin{frame}
+%   \frametitle{Filterbank}
+%   \begin{itemize}
+%   \item Besteht aus 8 Teilfiltern und Verzögerungsgliedern
+%   \end{itemize}
+%   \begin{figure}[h!]
+%     \centering	\includegraphics[width=15cm]{img/OktavFilter.png}
+%     \caption{Oktav-Filterbank mit neun Teilbändern \cite[][S. 95]{kunold1989}}\label{fig:OktavFilterbank}
+%   \end{figure}  
+% \end{frame}
+
+\subsection{Ergebnisse}
+
+\begin{frame}
+  \frametitle{Erstes Teilband im Frequenzbereich}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_freq_0.png}\caption{Ausgang des ersten Teilbandes}
+    \label{fig:Teilband0}
+  \end{figure}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Sechstes Teilband im Frequenzbereich}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_freq_5_close.png}
+  \caption{Ausgang des sechsten Teilbandes}\label{fig:Teilband5}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Filterbankausgang im Frequenzbereich}
+  \begin{itemize}
+  \item Abweichung vom optimalen Allpass-Verlauf bei den Übergängen zwischen den Teilbändern
+  \end{itemize}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_freq_summe_keinAusgleich.png}
+    \caption{Dämpfung der Oktav-Filterbank ohne Laufzeitausgleich}\label{fig:AusgangDeampfung}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ausgleich der Signallaufzeiten}
+  \begin{itemize}
+  \item Ermittlung der Signallaufzeiten durch Ablesen der Maxima der einzelnen Teilbänder
+  \item Letzes Teilband hat Maximum nach 1500 Takten
+  \end{itemize}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_zeit_alle_keinAusgleich.png}
+    \caption{Signallaufzeiten der Teilfilterbänder ohne Ausgleich}\label{fig:TeilbandLaufzeitenohne}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Ausgleich der Singallaufzeiten}
+  \begin{itemize}
+  \item Verzögerung der schnelleren Ausgänge auf Laufzeit des langsamsten Ausgangs
+  \end{itemize}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_zeit_alle.png}
+    \caption{Signallaufzeiten der Teilfilterbänder}\label{fig:TeilbandLaufzeiten}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Filterbankausgang im Frequenzbereich}
+  \begin{itemize}
+  \item Geringere Abweichung vom optimalen Verlauf durch Laufzeitausgleich
+  \end{itemize}
+  \begin{figure}[h!]
+    \centering	\includegraphics[width=\textwidth]{img/bank_freq_summe_keinAusgleich.png}
+    \caption{Dämpfung der Oktav-Filterbank mit Laufzeitausgleich}\label{fig:AusgangDeampfung}
+\end{figure}
+\end{frame}
+
 \section{Realisierung}
     \begin{frame}
         \begin{itemize}

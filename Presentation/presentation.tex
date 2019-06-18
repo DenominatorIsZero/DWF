@@ -136,7 +136,7 @@
 \frametitle{Hochselektive Filterbank in Brückenstruktur}
 \begin{itemize}
 	\item Oktav-Filterbank mit bis zu 9 Teilbändern
-	\item Bieziproke Teilbandfilter
+	\item Bieziproke Teilbandfilter 19. Grades
 	\item Simulation mit Python
 	\item Hardwarerealisation auf DSP TMS320C6713
 \end{itemize}
@@ -146,9 +146,19 @@
 
 \begin{frame}
 \frametitle{Bireziproker Teilbandfilter}
+\begin{itemize}
+	\item Unterklasse der Wellendigitalfilter
+	\item Durchlassdämpfung oder Sperrdämpfung frei wählbar
+	\item N - 1 / 2 Adaptoren
+	\item Verwendung von Cauer-Parametern
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Bireziproker Teilbandfilter}
 \begin{figure}
 	\centering
-	\includegraphics[width=1\textwidth]{img/BireziprokerFilter.png}
+	\includegraphics[width=1\textwidth]{img/Teilbandfilter.png}
 	\caption{Grundstruktur des bireziproken Wellendigitalfilters \cite[][S. 85]{gaszi1983}}\label{fig:birez_filt}
 \end{figure}
 \end{frame}
@@ -161,6 +171,21 @@
 	\caption{Verwendeter Adaptor für den bireziproken Wellendigitalfilter \cite[][S. 77]{gaszi1983}}
 	\label{fig:Adaptor_birez}
 \end{figure}
+\begin{itemize}
+	\item Verwendung für die Simulation, da kein Variablenoverflow
+	\item Adaptor mit alpha = gamma
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Oktav-Filterbank}
+\begin{itemize}
+	\item Besteht aus mehreren Brücken-Wellendigitalfiltern
+	\item Halbierung des Frequenzbandes pro Teilfilterband
+	\item für jedes Teilband Filtertransformation
+	\item Daraus folgt: Für jede Stufe Verdopplung der Delays
+	\item Verzögerungen nach den Teilbändern, um die Phasenverschiebung auszugleichen
+\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -319,17 +344,6 @@
                 \item Rohde \& Schwarz UPV Audio Analyser  
             \end{itemize}
         \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-        \begin{itemize}
-            \item Filterstruktur der Teilbandfilter nach Gaszi
-        \end{itemize}
-        \begin{figure}[b]
-            \centering
-            \includegraphics[width=\textwidth]{img/Teilbandfilter.png}
-            \caption{Struktur eines Teilbandfilters \citep[Abb. 14a]{gaszi1983}}
-        \end{figure}    
     \end{frame}
 
     \begin{frame}

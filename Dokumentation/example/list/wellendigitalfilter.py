@@ -251,4 +251,4 @@ maximum = [4, 20, 44, 91, 186, 375, 755, 1500, 900]
 # Benoetigte Verzoegerungen damit die Impulsantworten der einzelnen Teilbaender
 # ihr Maximum zur selben Zeit erreichen
 delay_num = [max(maximum) - m if max(maximum) - m > 0 else 1 for m in maximum]
-test_Filter_Bank()
+test_Filter_Bank(delay_num)

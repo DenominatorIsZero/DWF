@@ -43,9 +43,19 @@ Abschließend wird die gesamte Oktav-Filterbank simuliert. In Abbildung \ref{fig
 	\caption{Signallaufzeit der Summe der Oktav-Filterbank}
 	\label{fig:OktavLaufzeit}
 \end{figure}
-In Abbildung \ref{fig:AusgangDeampfung} ist die Dämpfung der Filterbank zu sehen. Hierbei kommt es bei den Übergängen der einzelnen Teilbändern zu kleinen Abweichungen, da es sich um nicht lineare Filter in den Teilbändern handelt und eine feste Verzögerung implementiert wurde. Hierdurch ist die Verzögerung nicht bei allen Frequenzen optimal. Ein weiterer Punkt sind numerische Rundungsfehler, wodurch das Ergebnis ebenfalls leicht verfälscht wird und die Übergänge der Teilbandfilter nicht optimal sind.
+Abbildung \ref{fig:AusgangDeampfungohneAusgleich} zeigt die Dämpfung der Filterbank ohne Laufzeitausgleich. In Abbildung \ref{fig:AusgangDeampfung} hingegen ist die Dämpfung der Filterbank mit Laufzeitausgleich zu sehen. Wie zu erkennen ist, verbessert sich die Dämpfung an den Übergängen der einzelnen Teilbänder durch den Laufzeitausgleich. Die Abweichungen an den Übergängen der einzelnen Teilbänder sind durch die unterschiedlichen Phasengänge bedingt. Hierdurch ist die Verzögerung nicht bei allen Frequenzen optimal. Ein weiterer Punkt sind numerische Rundungsfehler, wodurch das Ergebnis ebenfalls leicht verfälscht wird und die Übergänge der Teilbandfilter nicht optimal sind. Die Impulsantworten der niederfrequenten Teilbänder sind zum Ende der Simulation noch nicht vollständig Ausgeschwungen (siehe Abbildung \ref{fig:Ausschwingen}). 
+\begin{figure}[h!]
+	\centering	\includegraphics[width=14cm]{img/bank_freq_summe_keinAusgleich.png}
+	\caption{Dämpfung der Oktav-Filterbank ohne Laufzeitausgleich}
+	\label{fig:AusgangDeampfungohneAusgleich}
+\end{figure}
 \begin{figure}[h!]
 	\centering	\includegraphics[width=14cm]{img/bank_freq_summe.png}
-	\caption{Dämpfung der Oktav-Filterbank}
+	\caption{Dämpfung der Oktav-Filterbank mit Laufzeitausgleich}
 	\label{fig:AusgangDeampfung}
+\end{figure}
+\begin{figure}[h!]
+	\centering	\includegraphics[width=14cm]{img/bank_zeit_alle_ausschwingen.png}
+	\caption{Ausschwingen der niederfrequenten Teilbänder}
+	\label{fig:Ausschwingen}
 \end{figure}
